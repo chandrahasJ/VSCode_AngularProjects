@@ -1,0 +1,50 @@
+1) Adding Extensions - 
+    C# Extensions
+    C# 
+    Nuget Package Manager
+    Angular v<N> snippets
+    Angular Files 
+    Angular Language Service
+    angular2-switcher
+    Debugger for Chrome
+    Material Icon Theme - By Default it is deactivated - Crtl + Shift + P -> Type Material Icon & Active it 
+    Prettier - Code formatter
+    TS Lint
+    npm Intellisense.
+    Auto Rename Tag
+    Bracket Pair Colorizer
+    IntelliSense for CSS class names in HTML
+2) Terminal - Ctrl + `
+3) For Command to active Nuget Package Manager etc. ->   Ctrl + Shift + P
+4) Adding ConnetionStrings in appsetting.json will be overridden by appsetting.Development.json
+5) Database 
+    a) Create Migrations : dotnet ef migrations add <NameOfMigration>
+    b) Remove Migrations : dotnet ef migrations remove <NameOfMigration>
+    c) Update Migrations : dotnet ef database Update    
+        Update the latest created migration into database 
+    d) Reverting Migrations from DB : dotnet ef database Update <NameOfMigration>
+6) SqlLite -> We must always Click on (Write Changes) after adding new records in the table in SqlLite
+7) Use goto any file using Ctrl + P 
+8) Use crtl + shift + tab to toggle between open documents
+9) Install @angular/cli globally(-g) : npm install -g @angular/cli@6.0.8
+10) Create new angular project - ng new <ProjectName>
+    Note : dot is not allowed in the Project Naming Convention
+            Illegal Naming Convention : NS.SPA
+            Valid Naming Convention : SPA or NS-SPA 
+11) Angular - Angular hides the complexity which comes with Webpack. Behind the scenes Angular use Webpack to create package bundle     
+    main.ts(platformBrowserDynamic().bootstrapModule(AppModule)) bootstraps AppModule.
+    AppModule((bootstrap: [AppComponent])) bootstraps AppComponent.
+    AppComponent has a selector i.e. app-root in @Component Decotrator which is used in index.html as <app-root></app-root>
+12) To run angular project - ng serve
+    To build angular project - ng build
+13) Angular Switcher - Alt + U,I,O 
+14) For installing Bootstrap & FontAwesome
+    npm install bootstrap font-awesome
+15) git status
+16) To run dotnet application we must type dotnet watch run in Terminal.
+17) To Create Dummy Data We can use json generator below is the link
+    https://www.json-generator.com                 It Fcuk Awesome.
+18) To Get Random Pics we can use below link.
+    Woman - https://randomuser.me/api/portraits/women/<DynamicID>.jpg
+    Man - https://randomuser.me/api/portraits/men/<DynamicID>.jpg
+    Lego - https://randomuser.me/api/portraits/lego/<DynamicID>.jpg

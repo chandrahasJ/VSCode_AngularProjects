@@ -1,0 +1,22 @@
+<div class="container mt-5">
+  <div *ngIf="!registeMode" class="text-center">
+        <h1>Find your Ātma saṅgāti</h1>         
+        <p class="lead">
+            Just Sign In & Find your Snehitaru's 
+        </p>        
+        <div class="text-center">
+            <button class="btn btn-primary btn-lg mr-4" (click)="registerToggler()">Register</button>
+            <button class="btn btn-success btn-lg">Learn More...</button>
+        </div>
+  </div>
+  <div *ngIf="registeMode" class="container">
+        <div class="row justify-content-center">
+                <!-- <app-register [RegisterValue]="values"></app-register> -->
+                <app-register [RegisterValue]="values" (cancelRegisterMode)="cancelRegisterMode($event)"></app-register>
+        </div>        
+  </div>
+</div>
+
+<!-- <p *ngFor="let value of values">
+    {{value}}
+</p> -->

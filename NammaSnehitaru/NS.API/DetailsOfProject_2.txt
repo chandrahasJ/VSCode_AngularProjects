@@ -1,0 +1,84 @@
+Note : {
+    1) Sequence is every important when we add something configure method in startup class.        
+    
+}
+1) Repository Pattern
+    A layer between Controller and ORM that hides the complexity from Controller.
+    Why to 
+    a) Minimizes the duplicate query logic
+    b) Decouple application from peristance framework 
+        i.e. As Controller doesn't have idea about ORM only methods are exposed.
+             we can change the ORM if required.
+    c) All the DB queries in the same place
+    d) Promotes Testablity 
+2) Repository Pattern
+    One Interface with skeleton(methods) to be implemented 
+    One Class which will be implement those methods
+    Using Dependency Injection we will use these Interface in the controller
+3) Any is better/faster than count 
+    since count will iterate through whole Collection but
+          any will break if it founds the value          
+4) Dependency Injection in Core 
+    Singleton -> Create a Object only once and use that same object wherever it is used.
+        Not suitable for concurrent requests.
+    Transient -> Create a object for every new request we make for that class\interface.      
+        Not suitable for heavily used functionalities.
+    Scoped -> Create a object once per request within the scope.
+            In Web Application, every web request creates a new services scope 
+            i.e. scoped services are generally created per web request.
+5) ApiController -> if you decorated your class with ApiController Attribute then
+        a) we don't need to decorate [FromBody],[FromHeader] etc attribute in the Api's parameter
+        b) we don't need to validate ModelState as well 
+    Well Removing ApiController from the class will lead to extra work as shown below
+    //[ApiController]
+    public class AuthController : ControllerBase
+    {
+        public Task<IActionResult> Post([FromBody] UserRegisterDTO userRegister)
+        {
+                if(!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+        }
+    }
+6) Token Authenication - 
+    Json Web Token(JWT) - Industry Standard Token
+    It has three part 
+    a) Header - Contains algorithm & type of token. (Can we decode by any one)        
+    b) Payload - Contains Unqiue Identifiers & expire & other dates (Can we decode by any one)
+            As Header & Payload can be viewed by any one make sure you don't add sensetive data in the Payload.
+            Sites like www.jwt.io can be used to decode the Header & Payload data
+    c) Secert - Secert is stored on the server and never revealed to the client.
+              - As Secert will be validate by the server using token saved in the appsettings.json file.
+              - We need to make sure token is long enough & should be a uniquily generated value
+7) Steps for creating JWT 
+    a) Create a Claims arrays to save username & Id
+    b) Create a key that will be hashed with secert token.
+    c) Create a Signing Credentials key using key created in step (b) & use encrytion algorithm i.e. HMACSHA512 etc.
+    d) Create a Security Token Descriptor will contain Claims , Signing Credentials Key & Expire Date of the Token.
+        Subject = new ClaimIdentity(claims) -> Claims created in step (a)
+        Expires = <Whatever you want>
+        SigningCredentials = signing Credentials created in step (c)
+    e) Create a Object Jwt Security Token Handler 
+    f) Create a Token using Jwt Security Token Handler object created in step (e) by calling CreateToken
+        and pass Security Token Descriptor to it.
+    g) To Pass this token to client we must use object Jwt Security Token Handler & call WriteToken method 
+        and pass the Token Object created in step (f)
+8) Adding Middleware Authenication 
+    a) We need to add services.AddAuthenication in configureServices method in Startup class
+        var key = new SymmetericSecurityKey(Encoding.UTF8.GetBytes(
+            Configuration.GetSection("AppSettings:Token").Value
+        ));
+        services.AddAuthenication(JwtBearerDefault.AuthenicationScheme)
+                .AddJwtBearer(options => {
+                    TokenValidationParameters = new TokenValidationParameters{
+                        ValidateAudience = false,
+                        ValidateIssuer = false,
+                        ValidateIssuerSigningKey = false,
+                        IssuerSigningKey = key
+                    };
+                });
+    b) We also need to add app.UseAuthenication in Configure method in Startup class
+        Before app.UseMvc(); we have to add app.UseAuthenication();
+    c) Decorate Authorize attribute on the class to authenicate the method
+    d) Decorate AllowAnonyomous attribute on the method for allowing any user to access those data.

@@ -1,0 +1,120 @@
+NOTE :{
+    1) Always Remember :  We must add repository as services to use it without any hassles.                    
+    2) Always Remember : If you have something wierd error in your application related to API. 
+                         Go to Terminal -> Check for fail:(you will get more information regarding the 
+                         Error) .
+    3) Always Remember : While adding parameter in your controller add the parameter inside the curly bracket.
+                         HttpGet["{ParameterName}"]
+                         [HttpGet("{id}")]
+}
+1) By Default, When ef generates a migration script 
+    Primary Foreign key Cascade Delete is off
+    i.e.  if primary source is deleted than data linked to it won't be deleted.
+2) Let say we have update the migration in the DB using 
+    dotnet ef database update 
+    But you realised that we need to revert this migration 
+    Step 1) dotnet ef database update <NameOftheMigrationScript> and you are done.
+3)  But In SqLite, Things are different.
+    If we fire the below ef command 
+    dotnet ef database update <NameOftheMigrationScripts> then it will give you error
+    Only way out is to drop the DB & remove the migration & update the database with pervious migration 
+    As shown below,
+    a) dotnet ef database drop
+    b) dotnet ef migrations remove
+    c) dotnet ef database update AddedUserModel
+    https://docs.microsoft.com/en-us/ef/core/providers/sqlite/limitations
+    In Sqlite, We have limition that we are unable to drop column
+4) If you want to add cascade delete for relational table then 
+   We need to add primary model class & primary key id in the foreign key table
+   i.e. 
+    public class APrimary{
+        public int Id {get; set; }
+        public string Name {get; set; }
+        public ICollection<AForeign> AForeigns {get; set; }
+    }
+
+    public class AForeign
+    {
+        public int Id {get; set; }
+        public string AFName {get; set; }
+        public APrimary APrimary {get; set; }
+        public int APrimaryId {get; set; }
+    }
+    
+    Doing the above step will make sure that APrimaryId will be nullable : false 
+    & OnDelete will be Referential Action will be cascade
+    It will be generate by ef command itself.
+5)  Seeding Data 
+    To Create Dummy Data We can use json generator below is the link
+    https://www.json-generator.com 
+    It Fcuk Awesome.
+    a) We need to create a snippet & use that snippet to generate the random dummy data 
+        Just modify the data for male
+        [
+            '{{repeat(7)}}',
+            {
+                Username: '{{firstName("female")}}',
+                Gender: 'female',
+                DateOfBirth: '{{date(new Date(1950,0,1), new Date(1999, 11, 31), "YYYY-MM-dd")}}',
+                Password: 'password',
+                AKA: function(){ return this.Username; },
+                CreatedOn: '{{date(new Date(2017,0,1), new Date(2017, 7, 31), "YYYY-MM-dd")}}',
+                LastActiveTime: function(){return this.DateCreated; },
+                ProfileIntroduction: '{{lorem(1, "paragraphs")}}',
+                LookingFor: '{{lorem(1, "paragraphs")}}',
+                Interests: '{{lorem(1, "sentences")}}',
+                City: '{{city()}}',
+                Country: '{{country()}}',
+                Photos: [
+                    {
+                    url: function(num) {
+                    return 'https://randomuser.me/api/portraits/women/' + num.integer(1,99) + '.jpg';
+                    },
+                    isMain: true,
+                    description: '{{lorem()}}'
+                }
+                ]
+            }
+        ]
+    b) Save the generated data from Json generate website to a json file.
+6) In Application do the below steps 
+    [Note : {
+        1) if you create a fresh database then you can run the application. no issues. 
+        2) if you already have data then drop the DB & Update the DB 
+            dotnet ef database drop
+            dotnet ef database update <LatestMigrationName>
+        3) Once the data is added into DB. we can comment the code in the Configure Method for seeding.
+    }]
+    a) Create a Seed Class, add consrutor with DataContext object.
+    b) Read the Json data, save this json data into the object.
+    c) We must add the Seed Class as services(ConfigureServices) in Startup Class, As shown below  
+        ConfigureServices -> 
+            services.AddTransient<Seed>();
+    d) We must add Seed Class in Configure method as a parameter and invoke SeedUser Method
+         public void Configure(IApplicationBuilder app, 
+                              IHostingEnvironment env,
+                              Seed seeder) ->
+            seeder.SeedUser();
+7)  Below code will include navigation property as well 
+    public async Task<User> GetUser(int id)
+    {
+        var User = await Context.Users.Include(p => p.Photos).FirstOrDefaultAsync(pp => pp.Id == id);
+
+        return User;
+    }
+    The Above code will include all the data from photo(navigation) table also. 
+8)  When we use navigation property there is a change we will face "Self referencing loop detected error"
+    while serializing the data.
+    Below is code to handle it as we doing it intentionally because we need primary & foriegn key relationship in DB.
+    In Startup.cs -> ConfigureServices 
+            services
+                .AddMvc()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+                .AddJsonOption(options => {
+                    options.SerializerSettings.ReferenceLoopHandling =
+                            ReferenceLoopHandling.Ignore;                    
+                });
+9)  
+
+
+          

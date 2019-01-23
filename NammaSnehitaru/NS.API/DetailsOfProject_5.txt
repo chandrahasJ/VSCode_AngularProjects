@@ -1,0 +1,36 @@
+Note : {
+    1) When we add something in the angular.json like scripts or style then we need to restart the server. 
+    2) In html file , We won't be able to reference private members declared inside the ts file.
+    3) Angular services are singleton. Once initialize the scope of the object is throughout the app.
+}
+Thrid Party Component 
+a) alertyjs - 
+    1) Add alertyjs in the SPA. 
+        npm i alertify --save
+    2) Add alertyjs scripts path from the node_module in the angular.json.
+    3) Add alertyjs & bootstrap css path from the node_module in the angular.json.    
+    4) We need add the service class & wrap the alertify js method inside this service.
+    5) Declare a alertify variable in this service
+        i.e. declare let alertify: any; 
+    7) Add this service class in the providers in the app.module.ts
+b) Angular JWT - It is installed as Service & Help us to decode the token.
+    https://github.com/auth0/angular2-jwt 
+    npm install @auth0/angular-jwt@2.0.0
+    a) Initialize the Service 
+        const helper = new JwtHelperService();
+    b) We can use decodeToken, expirationDate & iExpired methods
+    c) Using decodeToken and providing the token to it,
+        we get access to it data.
+c) NRX Bootstrap - https://valor-software.com/ngx-bootstrap/#/
+    https://github.com/valor-software/ngx-bootstrap
+    npm install ngx-bootstrap@3.1.1 --save
+    1) Add the Module to be used in the App.Module.ts
+    2) Check the documentation for the implementations
+d) Bootwatch : https://bootswatch.com
+     npm i bootswatch@4.1.1 --save
+     a) Install the bootswatch 
+     2) Add the desired theme in the style.css in the application 
+     
+    
+
+

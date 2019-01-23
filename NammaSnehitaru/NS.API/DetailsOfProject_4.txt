@@ -1,0 +1,77 @@
+Error Handling in net Core & Angular(HttpInterceptor)
+Note : [
+    1) By Default, Exception Page created by Core in Development\Production Mode 
+        doesn't have CORS header. Hence we get Access-Control-Allow-Orgin in the browser.
+    2) In Development Mode, There is no away we can add custom header to supress this Error.
+    3) In Production Mode, We can add custom header inside the "response" using Extension Method's.
+]
+1) Global Handling of Error in Asp.net core 
+    a) We need to add middleware in configure method in the Startup class
+        app.UseExceptionHandler();
+    b) We must customize this middleware app.UseExceptionHandler() for getting custom error messages,
+        adding custom header to response we are senfing back & StatusCode.
+    c) this middleware takes ApplicationBuilder as argument.
+    d) Inside ApplicationBuilder.Run we get the context and use this context to customize the response.
+    e) We need to create a extension method for response to add custom headers.
+    E.g.
+        Inside Extension class 
+        public static void AddCustomHeader(this HttpResponse response,string message)
+        {
+            response.Header.Add("Application-Error",message);
+            response.Header.Add("Access-Control-Expose-Error","Application-Error");
+            response.Header.Add("Access-Control-Allow-Origin","*");
+        }
+
+        Inside configure method in Startup class
+
+        app.UseExpectionHandler(
+            //Application Builder 
+            builder => {
+                //Application Builder has Run method where we can get context
+                builder.Run(
+                    //In context we can get request & Response
+                    async context => {
+                        //Customize the StatusCode 
+                        context.Response.StatusCode = (int)HttpStatusCode.IntenalServerError;
+
+                        //Get the Actual Error
+                        var error = context.Features.Get<IExceptionHandlerFeature>();
+                        if(error != null)
+                        {
+                            //Add the Custom Header to supress Access-Control-Allow-Orgin
+                            context.Response.AddCustomHeader(error.Error.Message);
+                            //Write the Error 
+                            async context.Response.WriteAsync(error.Error.Message);
+                        }
+                })
+            }
+        );
+2) Error Handling using HttpInterceptor
+    HttpInterceptor - As it intercepts every request. 
+    It enables us to transform data before passing to application. 
+    i.e. getting Error Message or adding Bearer JWT Token inside the request.
+    Steps to create a custom interceptors
+    1) Add a new class decorate it will @Injectable() decorator
+        @Injectable()
+        export class ErrorInterceptor Implement HttpInterceptor{
+
+        }        
+    2) Add interface HttpInterceptor to this class        
+    3) Implement the method intercept in this class as shown below.
+        intercept(req: HttpRequest<any>, 
+                  next : HttpHandler) : Observable<HttpEvent<any>> {
+            return next.handle(req);
+        }
+    4) Add Create a Custom Provider array with provide :HTTP_INTERCEPTOR Token, useClass: Class name & mutli : true as 
+       We want to add this interceptor in the Angular Http Pipeline.
+       export const ErrorHandlerInterceptorProvider = {
+           provide : HTTP_INTERCEPTOR,
+           useClass : ErrorInterceptor,
+           mutli : true
+       };
+    5) Add the Custom Provider variable created in the Step 4 in Providers inside App.Module.ts
+        Providers : [
+            ErrorHandlerInterceptorProvider
+        ]
+
+

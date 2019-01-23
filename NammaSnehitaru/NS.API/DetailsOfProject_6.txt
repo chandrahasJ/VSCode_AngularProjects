@@ -1,0 +1,89 @@
+Note : {
+    1) Angular routing is First Find Wins - Ordering this important.
+    2) Adding the wildcard will help to redirectTo the user to default component.
+}
+Routing : 
+a) Setting Up the Routing 
+    1) We need to create a route array which will contain path & component names
+        export const appRoutes : Routes = [
+            {path : 'home' , component : HomeComponent},
+            {path : 'lists' , component : ListsComponent},
+            {path : 'members' , component : MemberlistsComponent},
+            {path : 'messages' , component : MessagesComponent},            
+        ];
+    2) We need to also add wildcard(**) route if nothing matchs then
+        redirectTo & pathMatch will take care of the situation
+        export const appRoutes : Routes = [
+            {path : 'home' , component : HomeComponent},
+            {path : 'lists' , component : ListsComponent},
+            {path : 'members' , component : MemberlistsComponent},
+            {path : 'messages' , component : MessagesComponent},            
+            {path : '**' , RedirectTo : 'home', pathMatch : 'full'}
+        ];
+    3) We need to create a ts file add the below code 
+    4) Adding RouteModule inside the imports section in the App.Module.ts class
+    5) Make sure you have specified the route array variable in the RouteModule 
+        added in Step 4. As shown below.
+            RouteModule.forRoot(appRoutes)
+b) Configuring the Route in Html & CSS
+    1) We need to add [routerLink]="['/<componentname>']" & routerLinkActive="active" in the tags 
+       As shown below  
+        <ul class="navbar-nav mr-auto"  *ngIf="isLoggedIn()" >
+            <li class="nav-item" routerLinkActive="active">
+                <a class="nav-link" [routerLink]="['/members']"  >Matchs</a>
+            </li>
+            <li class="nav-item" routerLinkActive="active">
+                <a class="nav-link" [routerLink]="['/lists']">Lists</a>
+            </li>       
+        </ul>
+    2) We must also add router-outlet in the main page. 
+        <router-outlet></router-outlet>
+    3) We should constructer injection method to inject router service to use navigate from one component to another.
+        this.routeMeService.navigate(['/<componentname>']);
+c) Route Guard -  
+    1) We need to create route guard file using below command.
+        ng g guard <GuardName> --spec=false
+    2) We also need to add route guard in the providers section in the App.Module.ts    
+    3) Inside AuthGuard class - constructer
+        To Check User is loggedIn we will inject AuthService,
+        To Navigate if user is not loggedIn we will Router Service & 
+        To show messages We will inject AlertifyService
+    4) We will add logic inside canActivate() method inside AuthGuard  class.
+    5) We must add canActivate() method in the Route List created in the Section (a.1).
+        As shown below 
+        export const appRoutes : Routes = [
+            {path : 'home' , component : HomeComponent},
+            {path : 'lists' , component : ListsComponent, canActivate : [AuthGuard]},
+            {path : 'members' , component : MemberlistsComponent},
+            {path : 'messages' , component : MessagesComponent},            
+            {path : '**' , RedirectTo : 'home', pathMatch : 'full'}
+        ];
+d) Route Guard - Single AuthGuard to protect all the paths
+    a) We must create a dummy route and create a child route inside it & 
+        We will add the canActivate property to it.
+    b) Below is the code to be added to protect the multiple route with  single auth guard.
+        export const appRoutes: Routes = [
+            {path : '', component : HomeComponent},
+            {
+                path : '',
+                runGuardsAndResolvers : 'always',
+                canActivate : [AuthGuard],
+                children :[
+                    {path : 'members', component : MemberlistsComponent},
+                    {path : 'lists', component : ListsComponent},
+                    {path : 'messages', component : MessagesComponent}
+                ]
+            },
+            {path : '**', redirectTo : '', pathMatch : 'full'}
+        ];
+    c) if path : '' means http://localhost:4200 i.e. it will automatically lead to 
+        http://localhost:4200/home according the above code in point (b)
+    d) if path : '' and it has children then it means it will be redirected to
+        http://localhost:4200/messages
+        http://localhost:4200/members
+        http://localhost:4200/lists
+        According the above code in point (b)
+    
+
+
+

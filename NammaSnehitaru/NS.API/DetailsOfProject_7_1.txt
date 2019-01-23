@@ -1,0 +1,156 @@
+                                    AutoMapper
+NOTE :{
+    
+}
+1) To Add packages we can do it in two ways
+    a) Add the Package name & version in csproj file as shown below
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.2.0-preview3-35497"/>
+    b) Press Ctrl + Shift + P -> enter "nuget" -> Add nuget packages -> "<Add the Package to be installed>" 
+                              -> Press Enter -> Select the Version -> Press Enter -> Done.
+2) Auto Mapper is use to map object to object. 
+    e.g. your object model to view model object without any hassles as such 
+3) Steps to add AutoMapper 
+    a) Add AutoMapper in the startup.cs -> ConfigureServices
+        services.AddAutoMapper();
+        [Above will add the AutoMapper for Dependency Injection.]
+    b) Now Inject the IMapper Interface in the Class. Where we need to use it.
+        e.g. 
+        public class UsersController : ControllerBase
+        {
+            private readonly IMapper _mapper;
+            public UsersController(IMapper mapper)
+            {
+                _mapper = mapper;
+            }
+        }
+    c) To Map the Object we must use Map function in the IMapper interface 
+        As shown below
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetUsers(int id)
+        {
+            var User = await _repo.GetUser(id);
+
+            var userToReturn = _mapper.Map<UserForDetailedDTO>(user);
+
+            return Ok(userToReturn);
+        }
+
+         [HttpGet]
+        public async Task<IActionResult> GetUsers()
+        {
+              var Users = await _repo.GetUsers();
+
+              var userToReturn = _mapper.Map<IEnumerable<UserForListDTO>>(user);
+
+              return Ok(userToReturn);
+        }
+    d) We need to info AutoMapper about the  Mapping to be supported by adding AutoMapper Profiles
+        a) Class should be inherited by Profile Class
+        b) Use CreateMap<Source , Destination>(); to add the mapping 
+        As shown below
+        public class AutoMapperProfiles : Profile
+        {
+            public AutoMapperProfiles()
+            {
+                CreateMap<User, UserForListDTO>();
+                CreateMap<User, UserForDetailedDTO>();
+            }
+        }
+    e) AutoMapper is convention based. 
+        i.e. it will map objects according to property names declared inside the class
+        e.g. Let says we have two classes
+             class AModel
+             {
+                 public int Id {get; set;}
+                 public string FullName {get; set;}
+                 public DateTime DOB {get; set;}
+             }
+
+             class AViewModel
+             {
+                 public int Id {get; set;}
+                 public string FullName {get; set;}
+                 public int Age {get; set;}
+             }
+
+             Now if we map AModel to AViewModel then 
+             Id & FullName will be mapped automatically 
+             but Age will not be mapped for that we need to add configuration. 
+    f) If we are creating a DTO which contains other class reference in it.
+        if only neccessary thne we should create a DTO for that class with required properties.
+        let says, we have below class
+        class AUser{
+            public int Id {get; sert;}
+            public int Name {get; sert;}
+            public int Password {get; sert;}            
+            public ICollection<BPhotos> BPhotos { get; set; }
+        }
+
+        class BPhoto{
+            public int Id {get; set;}
+            public string PhotoUrl{get; set;}
+            public string PhotoDescription{get;set;}
+            public AUser AUser{get; set;}
+            public int UserId{get;set;}
+        }
+
+        class AUserForDetailedDTO{
+            public int Name {get; sert;}
+            public ICollection<BPhotos> BPhotos { get; set; }
+        }
+
+        Now while getting/Mapping the data for AUserForDetailedDTO. 
+        AutoMapper will also map the all the property inside the BPhotos
+        and we will get AUser data inside BPhotos in the JSON.
+
+        To avoid this circular referencing 
+        1) We must create a DTO for BPhotos i.e. BPhotoForDetailedDTO.cs(add only required properties)
+            class BPhotoForDetailedDTO{
+                public int Id {get; set;}
+                public string PhotoUrl{get; set;}
+                public string PhotoDescription{get;set;}
+            }
+        2) In AUserForDetailedDTO we must change BPhotos to BPhotoForDetailedDTO
+            class AUserForDetailedDTO{
+                public int Name {get; sert;}
+                public ICollection<BPhotoForDetailedDTO> BPhotos { get; set; }
+            }
+        3) Map it to BPhoto in AutoMapperProfiles. As shown below
+            CreateMap<BPhoto,BPhotoForDetailedDTO>();
+    g) For properties for which AutoMapper failed to map as they were not using same
+        Naming convention. 
+        we must use ForMember(Destination Member,Source Member) in the AutoMapperProfiles as shown below
+         CreateMap<User, UserForListDTO>()
+            .ForMember(dest => dest.PhotoUrl, opts => {
+                opts.MapFrom(source => 
+                    source.Photos.FirstOrDefault(p => p.IsMain).PhotoUrl);
+            });
+        
+        ForMember -> It is use to map properties manually 
+                     Customize configuration for individual member.                     
+        MapFrom -> MapFrom is  used inside the source 
+                   Map the Object from the Source class.
+                   We can use MapFrom when the properties is present but has some different naming convention.
+        ResolveUsing -> ResolveUsing is  used inside the source 
+                   Map the Object using custom value resolver callback.
+                   We can use ResolveUsing method when we want to calculate, perform some action on the property
+                   which has to be mapped as shown below
+        
+         CreateMap<User, UserForListDTO>()
+            .ForMember(dest => dest.PhotoUrl, opts => {
+                opts.MapFrom(source => 
+                    source.Photos.FirstOrDefault(p => p.IsMain).PhotoUrl);
+            })
+            .ForMember(dest => dest.Age, opts => {
+                opts.ResolveUsing(d => d.DateOfBirth.CalCulateAge());
+            });
+        The CalCulateAge is extension method used to calculate the age.
+        public static int CalCulateAge(this DateTime theDateTime){
+            int age = DateTime.Now.Year - theDateTime.Year;
+
+            return (DateTime.Now.AddYears(age) > DateTime.Today ? age-- : age);
+        }
+    h) Thank you bro... I can make it to the TOP.
+
+
+

@@ -1,0 +1,58 @@
+Note : {
+    1) we must add the name attribute if we want to get the reference in ts file.
+    2) Shorthand for if statement is !!
+}
+1) Angular Form Template sneakpeek
+    For using Angular Form Template we need to add "FormsModule" in AppModule.ts
+    a) #<name>="ngForm" will create angular form template 
+        if # is used then the Scope is outside the tag also
+    b) #<name>="ngModel" will create reference variable for that tag where it was used.
+        i.e. <input type="text" name="username" #username="ngModel"/>
+        if # is used then the Scope is outside the tag also
+    c) (<ActionName>) round bracket is for event handler binding 
+        <form #LoginForm="ngModel" (Submit)="login()">
+        </form>
+    d)  [(ngModel)] Round Bracket inside Square Bracket with ngModel Directive 
+        [()] also known as "Banana in a box"
+        Refers to Two Way Model binding
+2) Angular Form Template has validation also as listed below 
+    a) valid   
+    b) invalid 
+    c) touched - Control was touched or not.
+    d) dirty   - Control is in edit mode.
+    e) value   - Provides Control's data
+    [Note : We need to decorate the tag with validation attribute e.g. "required" to use these functionality] 
+3) Angular Services Sneak Peek 
+    Note : {
+        1) Component's are by default Injectable.
+        2) Services is not by default Injectable Hence must be decorate the service class with @Injectable({}) decorator.
+    }
+    a) Angular Services must be Decorated by @Injectable({}) or else it won't be injectable.     
+    b) To get the reference of Angular Service in the App. we need to add the Service in "Providers" : [<ServiceName>] inside "App.Module.ts"
+    c) As services are injected in components etc. we can stop duplication of code same as repository.
+4) Rxjs - more to come
+    Observable must be Subscibed.
+    pipe - Can take as many operator argument and executes in the order left to right.
+    map - enables us to process the Observable stream.
+5) Structual Directive have asterik(*) prefixed e.g. *ngIf="expression" 
+    This kind of directive can change DOM elements.
+6) Passing Data from Parent to Child Component
+    We will be adding below code in the child Component
+    [<NameOfVariableInsideChildComponent>]="<NameOftheVariableThatWillBePassedFromParentComponent>" 
+    In Child Component, We use @Input() prefixed to variable declaration.
+    That's it 
+7) Passing Data from Child to Parent Component  
+    1) We need to add @Output() Property 
+       As @Output() Property emits Event So we need to assign it EventEmitter()
+       i.e. @Output() EmitMe = new EventEmitter();
+       Make Sure you add the EventEmitter Reference from @angular/core
+    2) Use the @Output() property variable & emit the value 
+        i.e. this.EmitMe.emit("<Pass The Value Here>");
+    3) As we have seen @Output Property emits event Hence we will be using ()
+        (<OutputPropertyName>)="FunctionNameinParentClass($event)";
+    4) Use this $event data in the Parent Component 
+    That's it.
+
+
+
+    
